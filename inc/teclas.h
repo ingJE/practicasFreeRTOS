@@ -1,6 +1,6 @@
 //*****************************************************************************
 //
-// led_task.c - A simple flashing LED task.
+// led_task.h - Prototypes for the LED task.
 //
 // Copyright (c) 2012-2014 Texas Instruments Incorporated.  All rights reserved.
 // Software License Agreement
@@ -22,6 +22,10 @@
 //
 //*****************************************************************************
 
+#ifndef __TECLAS_H__
+#define __TECLAS_H__
+
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "inc/hw_memmap.h"
@@ -35,62 +39,26 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
-#include "inc/uart.h"
+
+#include "inc/main.h"
+
+enum _estadosMEF {eBot_UP,eBot_FALLING,eBot_DOWN,eBot_RISING};
+
+typedef enum _estadosMEF botonMEF;
 
 
-//*****************************************************************************
-//
-// Tarea a poblar con codigo
-//
-//*****************************************************************************
-static void prod(void *pvParameters)  {
-    portTickType lastWake;
-    uint32_t ui32Elemento = 1;
+struct _button  {
+    botonMEF estadoActual;
+    uint32_t boton;
+};
 
-
-    /* The lastWake variable needs to be initialized with the current tick
-        count. Note that this is the only time the variable is written to explicitly.
-        After this lastWake is automatically updated within vTaskDelayUntil(). */
-    lastWake = xTaskGetTickCount();
-
-
-    //
-    // Loop forever.
-    //
-    while(1)  {
-
-        xQueueSend(cola_1,&ui32Elemento,portMAX_DELAY );
-
-        ui32Elemento *= 2;
-
-        if (ui32Elemento > 1024*16)
-            ui32Elemento = 1;
-
-        /*
-         * Delay 2 segundo (2000ms)
-         */
-        vTaskDelayUntil( &lastWake, 2000 / portTICK_RATE_MS );
-    }
-}
+typedef struct _button button;
 
 //*****************************************************************************
 //
-// Initializes the LED task.
+// Prototypes for the LED task.
 //
 //*****************************************************************************
-int32_t  productor_Init(void)  {
+int32_t teclas_Init(void);
 
-    /*
-     * Crear la  tarea_1.
-     */
-    if( xTaskCreate(prod, (signed portCHAR *)"prod", configMINIMAL_STACK_SIZE, NULL,
-                       tskIDLE_PRIORITY + 2, NULL) != pdTRUE)
-    {
-        return(-1);
-    }
-
-    //
-    // Success.
-    //
-    return(0);
-}
+#endif // __TECLAS_H__

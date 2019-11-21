@@ -26,12 +26,21 @@
 #define __UART_H__
 
 
+#include <stdbool.h>
 #include <stdint.h>
+#include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
+#include "driverlib/gpio.h"
+#include "driverlib/sysctl.h"
+#include "uartstdio.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
 
-extern xQueueHandle cola_1;
-
-
+#include "inc/hw_configs.h"
+#include "inc/main.h"
 //*****************************************************************************
 //
 // Prototypes for the LED task.

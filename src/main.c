@@ -23,8 +23,7 @@
 //*****************************************************************************
 
 
-#include <inc/productor.h>
-#include <inc/productor.h>
+#include <inc/teclas.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "inc/hw_memmap.h"
@@ -32,7 +31,6 @@
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
-#include "utils/uartstdio.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -41,12 +39,8 @@
 
 
 #include "inc/hw_configs.h"
+#include "inc/teclas.h"
 #include "inc/uart.h"
-
-
-xQueueHandle cola_1;
-
-#define CANT_ELEMENTOS 10
 
 
 //*****************************************************************************
@@ -61,6 +55,22 @@ __error__(char *pcFilename, uint32_t ui32Line)
 }
 
 #endif
+
+
+
+/****************************************************************************
+ *                      DECLARACIONES GLOBALES
+ ****************************************************************************/
+
+xSemaphoreHandle sem_tecla1,sem_tecla2;
+
+
+xQueueHandle cola_1;
+
+xQueueHandle cola_2;
+
+#define CANT_ELEMENTOS 10
+
 
 
 //*****************************************************************************
@@ -86,16 +96,21 @@ int main(void)  {
     /*
      * Inicializamos las tareas
      */
-    productor_Init();
+
+    teclas_Init();
     uart_Init();
+   // led_Init();
+
 
     /*
-     * Inicializacion de semaforos y colas
+     * Creacion de los semaforos binarios
      */
+    sem_tecla1 = xSemaphoreCreateBinary();
+    sem_tecla2 = xSemaphoreCreateBinary();
+
     cola_1 = xQueueCreate(CANT_ELEMENTOS, sizeof(uint32_t));
 
-
-
+    cola_2 = xQueueCreate(CANT_ELEMENTOS, sizeof(uint32_t));
 
 
     //

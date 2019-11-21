@@ -22,21 +22,14 @@
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
-#include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
-#include "driverlib/gpio.h"
-#include "driverlib/sysctl.h"
-#include "uartstdio.h"
-
-
-#include "inc/hw_configs.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "semphr.h"
 #include "inc/uart.h"
+
+extern xQueueHandle cola_1;
+
+extern xQueueHandle cola_2;
+
+uint32_t ui32Elemento,ui32Elemento2;
+
 
 //*****************************************************************************
 //
@@ -46,14 +39,39 @@
 static void uart(void *pvParameters)  {
     uint32_t ui32Elemento;
 
+   // portTickType xLastWakeTime;
+
+    /* The lastWake variable needs to be initialized with the current tick
+           count. Note that this is the only time the variable is written to explicitly.
+           After this lastWake is automatically updated within vTaskDelayUntil(). */
+    //   xLastWakeTime = xTaskGetTickCount();
+
     //
     // Loop forever.
     //
     while(1)  {
 
-        xQueueReceive(cola_1,&ui32Elemento,portMAX_DELAY);
 
-        UARTprintf("Dato Recibido de la cola_1: %d\n",ui32Elemento);
+
+        if(xSemaphoreTake(sem_tecla1, 2 / portTICK_RATE_MS) == pdTRUE)  {
+            UARTprintf("Tecla 1 presionada\n");
+
+            xQueueReceive(cola_1,&ui32Elemento,portMAX_DELAY);
+
+            LED_control(ui32Elemento);
+
+         }
+
+
+        if(xSemaphoreTake(sem_tecla2, 2 / portTICK_RATE_MS) == pdTRUE)  {
+            UARTprintf("Tecla 2 presionada\n");
+
+            xQueueReceive(cola_2,&ui32Elemento,portMAX_DELAY);
+
+            LED_control(ui32Elemento);
+
+        }
+
     }
 }
 
@@ -77,4 +95,16 @@ int32_t  uart_Init(void)  {
     // Success.
     //
     return(0);
+}
+
+//***************************************************************************
+//
+//LED on / off
+//
+//***************************************************************************
+void LED_control(time){
+
+    GPIOPinWrite(GPIO_PORTF_BASE, LED_ROJO, LED_ROJO);
+    vTaskDelay(time / portTICK_RATE_MS);   //timepo prendido segun dato recibido de la cola
+    GPIOPinWrite(GPIO_PORTF_BASE, LED_ROJO, 0x00);
 }
